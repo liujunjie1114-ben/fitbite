@@ -1,0 +1,3 @@
+export function centerCrop(width,height){const size=Math.min(width,height)*224/256;return {x:(width-size)/2,y:(height-size)/2,size};}
+export function normalizePixels(rgba){const count=rgba.length/4,out=new Float32Array(count*3),mean=[.485,.456,.406],std=[.229,.224,.225];for(let c=0;c<3;c++)for(let i=0;i<count;i++)out[c*count+i]=(rgba[i*4+c]/255-mean[c])/std[c];return out;}
+export function topClasses(logits,labels,count=3){if(logits.length!==labels.length)throw Error('模型类别数不匹配');const max=Math.max(...logits),exps=Array.from(logits,x=>Math.exp(x-max)),sum=exps.reduce((a,b)=>a+b,0);return exps.map((v,i)=>({label:labels[i],score:v/sum})).sort((a,b)=>b.score-a.score).slice(0,count);}

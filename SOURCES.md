@@ -17,13 +17,15 @@
 
 ## 照片识别
 
-- 模型：[`onnx-community/swin-finetuned-food101-ONNX`](https://huggingface.co/onnx-community/swin-finetuned-food101-ONNX)
-- 原模型：[`aspis/swin-finetuned-food101`](https://huggingface.co/aspis/swin-finetuned-food101)
-- 模型卡声明许可：Apache-2.0。模型权重未包含在此仓库，由浏览器按需从原地址下载。
-- 推理库：[`@huggingface/transformers` 3.8.1](https://github.com/huggingface/transformers.js)，Apache-2.0。
-- 推理文档：https://huggingface.co/docs/transformers.js/v3.8.1/en/pipelines
-- 模型量化文件 `onnx/model_quantized.onnx`：93,297,500 字节，约 93.3 MB（89.0 MiB）。
-- ONNX Runtime 通过上述运行时按需加载，遵循其原项目许可：https://github.com/microsoft/onnxruntime
+- 模型：[`AlexKoff88/mobilenet_v2_food101`](https://huggingface.co/AlexKoff88/mobilenet_v2_food101)
+- 训练与导出来源：https://github.com/AlexKoff88/mobilenetv2_food101
+- 模型卡声明许可：Apache-2.0。采用原始已训练 PyTorch checkpoint，经本项目 `scripts/export-model.py` 以 `eval()` 模式重新导出 ONNX，未重新训练。许可、来源与原 checkpoint 校验和放在 `models/`。上游预导出的 ONNX 文件在本机产生近均匀输出，未通过样图检查，因此未用于最终版本。
+- 模型文件 `models/mobilenet_v2_food101.onnx`：约 9.4 MB。
+- 推理库：[`onnxruntime-web` 1.22.0](https://github.com/microsoft/onnxruntime/tree/v1.22.0)，MIT 许可。WebAssembly 引擎约 11.2 MB。原始运行文件与许可放在 `vendor/`。
+- 官方浏览器运行文档：https://onnxruntime.ai/docs/tutorials/web/env-flags-and-session-options.html
+- 图像预处理按原项目 `validate_checkpoint.py`：短边缩放到 256 后中心裁剪 224，RGB / 255，ImageNet mean `[0.485, 0.456, 0.406]`、std `[0.229, 0.224, 0.225]`，NCHW 排列。Food-101 类别按标准字母顺序排列；输出 logits 做稳定 softmax 后展示前三候选。
+
+模型与推理文件从本站加载，照片不上传服务器。原先调研的 Swin 模型约 93.3 MB，在实际网络下首次下载耗时较长，未纳入最终版本。
 
 Food-101 面向 101 种常见菜品，覆盖偏西式；本项目不承诺中餐识别率。输出候选为分类提示，不能检测多道菜的所有配料或自动称重。不直接将分类分数解释成营养准确率。仅为少量可以明确对应的类别提供参考数据映射，其余引导用户自行搜索或自定义，避免将不同菜品混为同一营养值。
 

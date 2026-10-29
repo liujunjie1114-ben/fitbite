@@ -1,1 +1,1 @@
-{"name":"fitbite","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node scripts/serve.mjs","test":"node --test tests/*.test.mjs","check":"node --check app.js && node --check nutrition.js && node --check vision.js"},"engines":{"node":">=20"}}
+{"name":"fitbite","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node scripts/serve.mjs","test":"node --test tests/*.test.mjs","check":"node --check app.js && node --check nutrition.js && node --check vision.js && node --check vision-core.js"},"engines":{"node":">=20"}}
