@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {FOODS, nutrition, parseMeal, totals, validateBackup} from '../nutrition.js';
+test('150g cooked rice scales nutrition without multiplying serving twice',()=>{const n=nutrition(FOODS.find(f=>f.id==='rice'),150);assert.equal(n.kcal,195);assert.equal(n.protein,4.05);});
+test('mixed natural language understands suffix grams, prefix eggs and milk cup',()=>{const r=parseMeal('米饭150克，鸡胸肉200g，2个鸡蛋，1杯牛奶',FOODS);assert.equal(r.items.length,4);assert.deepEqual(r.unknown,[]);assert.equal(r.items.find(x=>x.food.id==='egg').grams,100);assert.equal(r.items.find(x=>x.food.id==='milk').grams,257.5);});
+test('unknown food is never silently included or lost',()=>{const r=parseMeal('米饭100克，神秘火锅300克',FOODS);assert.equal(r.items.length,1);assert.equal(r.unknown.length,1);});
+test('adjacent foods and Chinese weight units',()=>{const r=parseMeal('米饭150克鸡胸肉2两',FOODS);assert.equal(r.items.length,2);assert.equal(r.items[1].grams,100);});
+test('reject invalid and unreasonable amounts',()=>{assert.throws(()=>nutrition(FOODS[0],-1));assert.throws(()=>nutrition(FOODS[0],Infinity));assert.equal(parseMeal('米饭0克',FOODS).items.length,0);assert.equal(parseMeal('米饭10001克',FOODS).items.length,0);});
+test('unknown units cannot be assumed grams',()=>{const r=parseMeal('米饭2桶',FOODS);assert.equal(r.items.length,0);assert.equal(r.unknown.length,1);});
+test('raw and cooked chicken are different foods',()=>{const r=parseMeal('生鸡胸肉100克，鸡胸肉100克',FOODS);assert.notEqual(r.items[0].food.id,r.items[1].food.id);assert.notEqual(r.items[0].food.kcal,r.items[1].food.kcal);});
+test('total empty meals is zero',()=>assert.equal(totals([]).kcal,0));
+test('backup validation rejects corrupt data and negative amounts',()=>{assert.throws(()=>validateBackup({hello:'world'}));assert.throws(()=>validateBackup({version:1,entries:[{grams:-3}],customFoods:[],water:{},goals:{}}));});
+test('backup rejects invalid liquid density before it can corrupt an estimate',()=>{const food={...FOODS.find(f=>f.id==='milk'),id:'custom-milk',density:'invalid'};assert.throws(()=>validateBackup({version:1,entries:[],customFoods:[food],water:{},goals:{kcal:2000,protein:120,carbs:250,fat:60}}));});
+test('valid backup round trips including custom food and water',()=>{const data={version:1,entries:[{id:'test',date:'2026-10-29',meal:'午餐',food:FOODS[0],grams:150}],customFoods:[],water:{'2026-10-29':250},goals:{kcal:2000,protein:120,carbs:250,fat:60},goalSet:true};assert.deepEqual(validateBackup(JSON.parse(JSON.stringify(data))),data);});
